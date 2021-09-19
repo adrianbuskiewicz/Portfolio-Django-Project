@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Companies</title>
+</head>
+<body>
+<form action="">
+	{% csrf_token %}
+	{{ form }}
+	<button type="submit">Zapisz</button>
+</form>
+
+<br/>
+<br/>
+{% for comp_stats in stats %}
+Name: {{ comp_stats.name }}
+<br/>
+Symbol: {{ comp_stats.symbol }}
+<br/>
+Price Mean: {{ comp_stats.price_mean }}$
+<br/>
+Price Volatility: {{ comp_stats.price_vol }}$
+<hr/>
+{% endfor %}
+
+
+</body>
+</html>

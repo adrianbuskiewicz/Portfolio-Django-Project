@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Create Portfolios
+{% endblock title %}
+
+
+{% block content %}
+<div class="container text-center">
+	<br/>
+	<h3>Companies in portfolios</h3>
+	<h5>{{ start_date }} - {{ end_date }}</h5>
+	<a type="button" class="btn btn-primary"
+		href="{% url 'companies:home' %}">Change</a>
+	<br/>
+	<br/>
+	<table class="table table-dark table-striped">
+		<thead>
+			<tr>
+				<td></td>
+				<td>Symbol</td>
+				<td>Name</td>
+				<td>Rate of return (daily)</td>
+				<td>Rate of return (annual)</td>
+				<td>Volatility (daily)</td>
+				<td>Volatility (annual)</td>
+			</tr>
+		</thead>
+		<tbody>
+			{% for company in companies %}
+			<tr>
+				<td><b>{{ forloop.counter }}</b></td>
+				<td>{{ company.symbol }}</td>
+				<td>{{ company.name }}</td>
+				<td>{{ company.financialprofile.rate_of_return }}%</td>
+				<td>{{ company.financialprofile.annual_rate_of_return }}%</td>
+				<td>{{ company.financialprofile.volatility }}%</td>
+				<td>{{ company.financialprofile.annual_volatility }}%</td>
+
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	<br/>
+	<div class="container">
+		<form method="POST" class="form-control bg-dark text-light">
+			{% csrf_token %}
+			{{ calculate_portfolios_form }} %
+			<button type="submit" class="btn btn-primary">Make predictions</button>
+		</form>
+	</div>
+	<br/>
+	<h3>MVP</h3>
+	<table class="table table-dark table-striped">
+		<thead>
+			<tr class="text-center align-middle">
+				<td rowspan="2">Rate of return</td>
+				<td rowspan="2">Volatility</td>
+				<td colspan="{{ companies|length }}" class="text-center">
+				Weights
+				</td>
+			</tr>
+			<tr class="text-center align-middle">
+				{% for mvp_company in mvp_weights %}
+					<td>{{ mvp_company.company }} %</td>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{{ mvp.rate_of_return }}%</td>
+				<td>{{ mvp.volatility }}%</td>
+				{% for mvp_company in mvp_weights %}
+					<td>{{ mvp_company.company_weight }} %</td>
+				{% endfor %}
+			</tr>
+		</tbody>
+	</table>
+	<br/>
+	<h3>ORP</h3>
+	<h5>Rf = {{ orp.rf }}%</h5>
+	<table class="table table-dark table-striped">
+		<thead>
+			<tr class="text-center align-middle">
+				<td rowspan="2">Rate of return</td>
+				<td rowspan="2">Volatility</td>
+				<td colspan="{{ companies|length }}" class="text-center">
+				Weights
+				</td>
+			</tr>
+			<tr class="text-center align-middle">
+				{% for orp_company in orp_weights %}
+					<td>{{ orp_company.company }} %</td>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{{ orp.rate_of_return }}%</td>
+				<td>{{ orp.volatility }}%</td>
+				{% for orp_company in orp_weights %}
+					<td>{{ orp_company.company_weight }} %</td>
+				{% endfor %}
+			</tr>
+		</tbody>
+	</table>
+</div>
+{% endblock content %}

@@ -1,29 +1,118 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>Companies</title>
-</head>
-<body>
-<form action="">
-	{% csrf_token %}
-	{{ form }}
-	<button type="submit">Zapisz</button>
-</form>
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
-<br/>
-<br/>
-{% for comp_stats in stats %}
-Name: {{ comp_stats.name }}
-<br/>
-Symbol: {{ comp_stats.symbol }}
-<br/>
-Price Mean: {{ comp_stats.price_mean }}$
-<br/>
-Price Volatility: {{ comp_stats.price_vol }}$
-<hr/>
-{% endfor %}
+{% block title %}
+Companies
+{% endblock title %}
 
-
-</body>
-</html>
+{% block content %}
+<br/>
+<br/>
+<br/>
+<div class="container text-center">
+	<div class="container">
+		<div class="row">
+			<div class="col-6">
+				<h3>Add company</h3>
+				<form method="POST" class="form-control bg-dark text-light">
+					{% csrf_token %}
+					{{ create_company_form|crispy }}
+					<button type="submit" class="btn btn-primary">Save</button>
+				</form>
+			</div>
+			<div class="col-6">
+				<h3>Companies</h3>
+				<table class="table table-dark table-striped">
+					<tbody>
+						{% for company in companies %}
+						{% include 'companies/includes/modals.html' %}
+						<tr>
+							<td>{{ company.symbol }}</td>
+							<td>{{ company.name }}</td>
+							<td>
+								<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+										data-bs-target="#Modal-CompanyEdit-{{ company.id }}">
+								  Edit
+								</button>
+							</td>
+							<td>
+								<form action="{% url 'companies:company_delete' company.id %}" method="POST">{% csrf_token %}
+								<input type="submit" class="btn btn-danger" value="Delete">
+							</form>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	
+	<br/>
+	<br/>
+	
+	<div class="container">
+		<form method="POST" class="form-control bg-dark text-light">
+			{% csrf_token %}
+			{{ calculate_stats_form }}
+			<button type="submit" class="btn btn-primary">Calculate</button>
+		</form>
+	</div>
+	
+	<br/>
+	<br/>
+	<h3>Companies Stats</h3>
+	<h5>{{ request.session.date_from }} - {{ request.session.date_to }}</h5>
+	<div class="container">
+		<table class="table table-dark table-striped">
+			<thead>
+				<tr>
+					<td></td>
+					<td>Symbol</td>
+					<td>Name</td>
+					<td>Rate of return (daily)</td>
+					<td>Rate of return (annual)</td>
+					<td>Volatility (daily)</td>
+					<td>Volatility (annual)</td>
+					<td></td>
+				</tr>
+			</thead>
+			<tbody>
+				{% for company in companies %}
+				<tr>
+					<td><b>{{ forloop.counter }}</b></td>
+					<td>{{ company.symbol }}</td>
+					<td>{{ company.name }}</td>
+					<td>{{ company.financialprofile.rate_of_return }}%</td>
+					<td>{{ company.financialprofile.annual_rate_of_return|floatformat }}%</td>
+					<td>{{ company.financialprofile.volatility }}%</td>
+					<td>{{ company.financialprofile.annual_volatility|floatformat }}%</td>
+					<td>
+						<form action="{% url 'companies:company_use' company.id %}" method="POST">{% csrf_token %}
+							<input type="submit"
+								{% if company.used_in_portfolio == 'yes' %}
+									class="btn btn-danger"
+									value="Not use in portfolio"
+								{% else %}
+									class="btn btn-success"
+									value="Use in portfolio"
+								{% endif %}>
+						</form>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<a type="button" class="btn btn-primary"
+			href="{% url 'portfolios:create_portfolios' %}">Create Portfolios</a>
+	</div>
+	<br/>
+	{% if request.session.corr_mat %}
+		<div class="container">
+			<h3>Correlation</h3>
+			<h5>{{ request.session.date_from }} - {{ request.session.date_to }}</h5>
+			{{ request.session.corr_mat|safe }}
+		</div>
+	{% endif %}
+</div>
+{% endblock content %}

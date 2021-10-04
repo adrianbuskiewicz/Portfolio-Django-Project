@@ -25,7 +25,7 @@ Create Portfolios
 			<tbody>
 				<tr class="align-middle">
 					<td></td>
-					<td>{{ portfolio.purchase_date|date:"d.m.Y" }}</td>
+					<td>{{ portfolio.purchase_date|date:"d.m.Y (H:i)" }}</td>
 					<td>{{ portfolio.budget|floatformat:2 }} $</td>
 					<td>{{ portfolio.purchase_whole_owned_capital|floatformat:2 }} $</td>
 					<td  class="{% if portfolio.summary_return < 0 %} bg-danger {% else %} bg-success {% endif %}">

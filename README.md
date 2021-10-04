@@ -4,4 +4,5 @@ Portfolio web app alowing users to calculate Minimal Volatility Portfolio and Op
 
 App isn't finished yet.
 There are to do:
-- authorizing views.
+- authorizing views,
+- companies update view update.

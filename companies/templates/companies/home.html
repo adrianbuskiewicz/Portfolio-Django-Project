@@ -6,9 +6,6 @@ Companies
 {% endblock title %}
 
 {% block content %}
-<br/>
-<br/>
-<br/>
 <div class="container text-center">
 	<div class="container">
 		<div class="row">
@@ -58,13 +55,12 @@ Companies
 			<button type="submit" class="btn btn-primary">Calculate</button>
 		</form>
 	</div>
-	
 	<br/>
 	<br/>
 	<h3>Companies Stats</h3>
-	<h5>{{ request.session.date_from }} - {{ request.session.date_to }}</h5>
+	<h5>{{ companies.first.financialprofile.start_date|date:"d.m.Y" }} - {{ companies.first.financialprofile.end_date|date:"d.m.Y" }}</h5>
 	<div class="container">
-		<table class="table table-dark table-striped">
+		<table class="table table-dark table-striped" id="use_companies_table">
 			<thead>
 				<tr>
 					<td></td>
@@ -110,7 +106,7 @@ Companies
 	{% if request.session.corr_mat %}
 		<div class="container">
 			<h3>Correlation</h3>
-			<h5>{{ request.session.date_from }} - {{ request.session.date_to }}</h5>
+	<h5>{{ companies.first.financialprofile.start_date|date:"d.m.Y" }} - {{ companies.first.financialprofile.end_date|date:"d.m.Y" }}</h5>
 			{{ request.session.corr_mat|safe }}
 		</div>
 	{% endif %}

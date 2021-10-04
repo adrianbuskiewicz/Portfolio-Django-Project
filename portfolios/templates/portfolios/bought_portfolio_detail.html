@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+
+{% block title %}
+Create Portfolios
+{% endblock title %}
+
+
+{% block content %}
+<div class="container text-center">
+	<h2>Portfolio details</h2>
+	</br>
+	<table class="table table-dark">
+		<thead>
+			<tr>
+				<td colspan="4"><h4>Purchase Date: {{ bought_portfolio.purchase_date|date:"d.m.Y" }} </h4></td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>Budget:</td>
+				<td class="bg-light text-dark">{{ bought_portfolio.budget|floatformat:2 }} $</td>
+				<td>Predicted rate of return:</td>
+				<td class="bg-light text-dark">{{ bought_portfolio.rate_of_return|floatformat:2 }}%</td>
+			</tr>
+			<tr>
+				<td>Type: </td>
+				<td class="bg-light text-dark">{{ bought_portfolio.portfolio_type }}</td>
+				<td>Predicted volatility:</td>
+				<td class="bg-light text-dark">{{ bought_portfolio.volatility|floatformat:2 }}%</td>
+			</tr>
+		</tbody>
+	</table>
+	<table class="table table-dark align-middle">
+		<thead>
+			<tr>
+				<td colspan="{{ all_stocks|length|add:'1' }}">
+					<h5>Companies:</h5></td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>Symbol:</td>
+				{% for stocks in all_stocks %}
+					<td>{{ stocks.symbol }}</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Name:</td>
+				{% for stocks in all_stocks %}
+					<td>{{ stocks.name }}</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Weights:</td>
+				{% for stocks in all_stocks %}
+					<td>{{ stocks.weight|floatformat:2 }}%</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Own stocks (amount):</td>
+				{% for stocks in all_stocks %}
+					<td>{{ stocks.owned_stocks_amount }}</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Purchased capital:</td>
+				{% for stocks in all_stocks %}
+					<td>{{ stocks.owned_capital|floatformat:2 }} $</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Purchase price:</td>
+				{% for stocks in all_stocks %}
+					<td>{{ stocks.purchase_price|floatformat:2 }} $</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Actual price:</td>
+				{% for stocks in all_stocks %}
+					<td class="{% if stocks.actual_price < stocks.purchase_price %} bg-danger {% else %} bg-success {% endif %}">
+						{{ stocks.actual_price|floatformat:2 }} $</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Price difference:</td>
+				{% for stocks in all_stocks %}
+					<td class="{% if stocks.price_difference < 0 %} bg-danger {% else %} bg-success {% endif %}">
+						{{ stocks.price_difference|floatformat:2 }} $</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Return:</td>
+				{% for stocks in all_stocks %}
+					<td class="{% if stocks.single_return < 0 %} bg-danger {% else %} bg-success {% endif %}">
+						{{ stocks.single_return|floatformat:2 }} $</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<td>Owned capital in day of purchase:</td>
+				<td colspan="{{ all_stocks|length }}">
+					{{ bought_portfolio.purchase_whole_owned_capital|floatformat:2 }} $</td>
+			</tr>
+			<tr>
+				<td>Summed capital now:</td>
+				<td class="{% if bought_portfolio.now_whole_owned_capital < bought_portfolio.purchase_whole_owned_capital %} bg-danger {% else %} bg-success {% endif %}"
+					colspan="{{ all_stocks|length }}">
+					{{ bought_portfolio.now_whole_owned_capital|floatformat:2 }} $</td>
+			</tr>
+			<tr>
+				
+				<td><strong>Summed Return:</strong></td>
+				<td class="{% if bought_portfolio.summary_return < 0 %} bg-danger {% else %} bg-success {% endif %}"
+					colspan="{{ all_stocks|length }}">
+					<strong>{{ bought_portfolio.summary_return|floatformat:2 }} $</strong></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+{% endblock content %}

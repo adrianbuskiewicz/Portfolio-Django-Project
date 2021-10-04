@@ -14,6 +14,20 @@
 	</title>
   </head>
   <body class="bg-secondary text-light">
+  	{% include 'includes/navbar.html' %}
+  	{% if messages %}
+		<ul class="messages">
+			{% for message in messages %}
+				<div class="container-fluid p-0">
+				  <div class="alert {{ message.tags }} alert-dismissible" role="alert" >
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+					</button>
+					{{ message }}
+				  </div>
+				</div>
+			{% endfor %}
+		</ul>
+	{% endif %}
     {% block content %}
 	{% endblock content %}
 

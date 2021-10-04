@@ -8,11 +8,10 @@ Create Portfolios
 
 {% block content %}
 <div class="container text-center">
-	<br/>
 	<h3>Companies in portfolios</h3>
 	<h5>{{ start_date }} - {{ end_date }}</h5>
 	<a type="button" class="btn btn-primary"
-		href="{% url 'companies:home' %}">Change</a>
+		href="{% url 'companies:home' %}#use_companies_table">Change</a>
 	<br/>
 	<br/>
 	<table class="table table-dark table-striped">
@@ -25,6 +24,7 @@ Create Portfolios
 				<td>Rate of return (annual)</td>
 				<td>Volatility (daily)</td>
 				<td>Volatility (annual)</td>
+				<td></td>
 			</tr>
 		</thead>
 		<tbody>
@@ -37,32 +37,51 @@ Create Portfolios
 				<td>{{ company.financialprofile.annual_rate_of_return }}%</td>
 				<td>{{ company.financialprofile.volatility }}%</td>
 				<td>{{ company.financialprofile.annual_volatility }}%</td>
+				<td>
+					<form action="{% url 'portfolios:not_use_company' company.id %}" method="POST">{% csrf_token %}
+						<input type="submit"
+								class="btn btn-danger"
+								value="&#10006;">
+					</form>
+				</td>
 
 			</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 	<br/>
+
 	<div class="container">
-		<form method="POST" class="form-control bg-dark text-light">
-			{% csrf_token %}
-			{{ calculate_portfolios_form }} %
-			<button type="submit" class="btn btn-primary">Make predictions</button>
-		</form>
+		{% if companies|length > 1 %}
+			<form method="POST" class="form-control bg-dark text-light">
+				{% csrf_token %}
+				{{ calculate_portfolios_form }} %
+				<button type="submit" class="btn btn-primary">Make predictions</button>
+			</form>
+		{% else %}
+		<h3>You need at least 2 companies to make predictions!</h3>
+		{% endif %}
 	</div>
 	<br/>
-	<h3>MVP</h3>
+	<br/>
+	<h3>Minimum Volatility Portfolio</h3>
+	<h5>Calculated for dates: {{ start_date }} - {{ end_date }}</h5>
+	<h5>Calculated for companies:
+	 	{% for mvp_company in mvp.company_weights.all %}
+			{{ mvp_company.company }}
+		{% endfor %}
+	</h5>
 	<table class="table table-dark table-striped">
 		<thead>
 			<tr class="text-center align-middle">
 				<td rowspan="2">Rate of return</td>
 				<td rowspan="2">Volatility</td>
-				<td colspan="{{ companies|length }}" class="text-center">
+				<td colspan="{{ mvp.company_weights.all|length }}" class="text-center">
 				Weights
 				</td>
 			</tr>
 			<tr class="text-center align-middle">
-				{% for mvp_company in mvp_weights %}
+				{% for mvp_company in mvp.company_weights.all %}
 					<td>{{ mvp_company.company }} %</td>
 				{% endfor %}
 			</tr>
@@ -71,26 +90,40 @@ Create Portfolios
 			<tr>
 				<td>{{ mvp.rate_of_return }}%</td>
 				<td>{{ mvp.volatility }}%</td>
-				{% for mvp_company in mvp_weights %}
+				{% for mvp_company in mvp.company_weights.all %}
 					<td>{{ mvp_company.company_weight }} %</td>
 				{% endfor %}
 			</tr>
 		</tbody>
 	</table>
+	{% include 'portfolios/includes/modals.html' %}
+	<button type="button" class="btn btn-lg btn-primary" data-bs-toggle="modal"
+										data-bs-target="#Modal-InvestPortfolio-{{ mvp.id }}">
+		  Invest in MVP
+	</button>
+	
 	<br/>
-	<h3>ORP</h3>
-	<h5>Rf = {{ orp.rf }}%</h5>
+	<br/>
+	<br/>
+	<h3>Optimal Risky Portfolio</h3>
+	<h5>Calculated for dates: {{ start_date }} - {{ end_date }}</h5>
+	<h5>Calculated for companies:
+	 	{% for orp_company in orp.company_weights.all %}
+			{{ orp_company.company }}
+		{% endfor %}
+	</h5>
+	<h4>Rf = {{ orp.rf }}%</h4>
 	<table class="table table-dark table-striped">
 		<thead>
 			<tr class="text-center align-middle">
 				<td rowspan="2">Rate of return</td>
 				<td rowspan="2">Volatility</td>
-				<td colspan="{{ companies|length }}" class="text-center">
+				<td colspan="{{ orp.company_weights.all|length }}" class="text-center">
 				Weights
 				</td>
 			</tr>
 			<tr class="text-center align-middle">
-				{% for orp_company in orp_weights %}
+				{% for orp_company in orp.company_weights.all %}
 					<td>{{ orp_company.company }} %</td>
 				{% endfor %}
 			</tr>
@@ -99,11 +132,19 @@ Create Portfolios
 			<tr>
 				<td>{{ orp.rate_of_return }}%</td>
 				<td>{{ orp.volatility }}%</td>
-				{% for orp_company in orp_weights %}
+				{% for orp_company in orp.company_weights.all %}
 					<td>{{ orp_company.company_weight }} %</td>
 				{% endfor %}
 			</tr>
 		</tbody>
 	</table>
+	{% include 'portfolios/includes/modals.html' %}
+	<button type="button" class="btn btn-lg btn-primary" data-bs-toggle="modal"
+										data-bs-target="#Modal-InvestPortfolio-{{ orp }}">
+		  Invest in ORP
+	</button>
+	<br/>
+	<br/>
+	<br/>
 </div>
 {% endblock content %}

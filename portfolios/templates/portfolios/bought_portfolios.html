@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Create Portfolios
+{% endblock title %}
+
+
+{% block content %}
+<div class="container text-center">
+	<h2>Bought Portfolios</h2>
+	{% for portfolio in bought_portfolios %}
+		<table class="table table-dark">
+			<thead class="align-middle">
+				<tr>
+					<td class="bg-light text-dark"><h5>{{ forloop.counter }}</h5></td>
+					<td>Purchase Date:</td>
+					<td>Budget:</td>
+					<td>Purchased capital:</td>
+					<td>Actual value:</td>
+					<td>Return:</td>
+					<td colspan="2">Check:</td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="align-middle">
+					<td></td>
+					<td>{{ portfolio.purchase_date|date:"d.m.Y" }}</td>
+					<td>{{ portfolio.budget|floatformat:2 }} $</td>
+					<td>{{ portfolio.purchase_whole_owned_capital|floatformat:2 }} $</td>
+					<td  class="{% if portfolio.summary_return < 0 %} bg-danger {% else %} bg-success {% endif %}">
+						{{ portfolio.now_whole_owned_capital|floatformat:2 }} $</td>
+					<td  class="{% if portfolio.summary_return < 0 %} bg-danger {% else %} bg-success {% endif %}">
+						{{ portfolio.summary_return|floatformat:2 }} $</td>
+					<td>
+						<a href="{{ portfolio.get_absolute_url }}" class="btn btn-primary">Details</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	{% endfor %}
+</div>
+{% endblock content %}

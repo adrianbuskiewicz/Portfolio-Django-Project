@@ -1,0 +1,23 @@
+{% load crispy_forms_tags %}
+
+<!-- Invest Modal -->
+<div class="modal fade" id="Modal-InvestPortfolio-{{ mvp.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark">
+      <div class="modal-header">
+        <h5 class="modal-title" id="InvestPortfolioModalLabel">Invest in {{ mvp.portfolio_type}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{% url 'portfolios:create_bought_portfolio' mvp.id %}" method="POST">
+        <div class="modal-body">
+            {% csrf_token %}
+            {{ invest_portfolio_form|crispy }}
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

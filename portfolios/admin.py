@@ -5,6 +5,7 @@ from .models import (
     MVP,
     ORP,
     BoughtPortfolio,
+    BoughtCompaniesStocks,
 )
 
 # Register your models here.
@@ -14,3 +15,4 @@ admin.site.register(CompanyWeight)
 admin.site.register(BoughtPortfolio)
 admin.site.register(MVP)
 admin.site.register(ORP)
+admin.site.register(BoughtCompaniesStocks)

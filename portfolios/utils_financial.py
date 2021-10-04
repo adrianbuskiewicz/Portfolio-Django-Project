@@ -57,9 +57,22 @@ def mvp_calculate(companies, start, end):
 
 def orp_calculate(companies, start, end, rf):
     portfolios = portfolios_simulation(companies, start, end)
-    orp = portfolios.iloc[((portfolios['RoR'] - rf) / portfolios['Volatility']).idxmax()]
+    orp = portfolios.iloc[((portfolios['RoR'] - (rf/100)) / portfolios['Volatility']).idxmax()]
     ror = round(orp.loc['RoR'] * 100, 2)
     vol = round(orp.loc['Volatility'] * 100, 2)
     companies_weights = {symbol: round(orp.loc[symbol] * 100, 2) for symbol in orp.index[2:]}
     return {'rate_of_return': ror, 'volatility': vol, 'companies_weights': companies_weights}
+
+
+def get_actual_price(symbol):
+    df = yf.download(tickers=symbol, period='1d', interval='1m')
+    date = df.index[-1]
+    price = df.loc[df.index[-1], 'Adj Close']
+    return {'date': date, 'price': price}
+
+
+def calculate_stocks_amount(budget, weight, symbol):
+    amount = (budget*weight/100)//get_actual_price(symbol)['price']
+    return amount
+
 

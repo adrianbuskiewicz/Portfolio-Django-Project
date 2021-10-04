@@ -9,8 +9,6 @@ class Company(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     symbol = models.CharField(
         max_length=10,
-        unique=True,
-        error_messages={'unique': 'This company is already added!'}
     )
     name = models.CharField(max_length=100)
 
@@ -39,12 +37,12 @@ class FinancialProfile(models.Model):
     end_date = models.DateField(null=True, blank=True)
 
     def annual_rate_of_return(self):
-        ann_ror = self.rate_of_return * 250 if self.rate_of_return else None
-        return round(ann_ror, 2)
+        ann_ror = round(self.rate_of_return * 250, 2) if self.rate_of_return else None
+        return ann_ror
 
     def annual_volatility(self):
-        ann_vol = sqrt(self.volatility * 250) if self.rate_of_return else None
-        return round(ann_vol, 2)
+        ann_vol = round(self.volatility * sqrt(250), 2) if self.volatility else None
+        return ann_vol
 
     def __str__(self):
         return f'{self.company} - RoR: ({self.rate_of_return}) - Vol: ({self.volatility})'

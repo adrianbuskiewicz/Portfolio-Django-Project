@@ -74,8 +74,8 @@ Create Portfolios
 	<table class="table table-dark table-striped">
 		<thead>
 			<tr class="text-center align-middle">
-				<td rowspan="2">Rate of return</td>
-				<td rowspan="2">Volatility</td>
+				<td rowspan="2">Rate of return (annual)</td>
+				<td rowspan="2">Volatility (annual)</td>
 				<td colspan="{{ mvp.company_weights.all|length }}" class="text-center">
 				Weights
 				</td>
@@ -88,8 +88,8 @@ Create Portfolios
 		</thead>
 		<tbody>
 			<tr>
-				<td>{{ mvp.rate_of_return }}%</td>
-				<td>{{ mvp.volatility }}%</td>
+				<td>{{ mvp.rate_of_return|floatformat:2 }}%</td>
+				<td>{{ mvp.volatility|floatformat:2 }}%</td>
 				{% for mvp_company in mvp.company_weights.all %}
 					<td>{{ mvp_company.company_weight }} %</td>
 				{% endfor %}
@@ -116,8 +116,8 @@ Create Portfolios
 	<table class="table table-dark table-striped">
 		<thead>
 			<tr class="text-center align-middle">
-				<td rowspan="2">Rate of return</td>
-				<td rowspan="2">Volatility</td>
+				<td rowspan="2">Rate of return (annual)</td>
+				<td rowspan="2">Volatility (annual)</td>
 				<td colspan="{{ orp.company_weights.all|length }}" class="text-center">
 				Weights
 				</td>
@@ -130,8 +130,8 @@ Create Portfolios
 		</thead>
 		<tbody>
 			<tr>
-				<td>{{ orp.rate_of_return }}%</td>
-				<td>{{ orp.volatility }}%</td>
+				<td>{{ orp.rate_of_return|floatformat:2 }}%</td>
+				<td>{{ orp.volatility|floatformat:2 }}%</td>
 				{% for orp_company in orp.company_weights.all %}
 					<td>{{ orp_company.company_weight }} %</td>
 				{% endfor %}

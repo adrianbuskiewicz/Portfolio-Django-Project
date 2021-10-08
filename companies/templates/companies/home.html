@@ -11,7 +11,7 @@ Companies
 		<div class="row">
 			<div class="col-6">
 				<h3>Add company</h3>
-				<form method="POST" class="form-control bg-dark text-light">
+				<form action="{% url 'companies:create_company' %}" method="POST" class="form-control bg-dark text-light">
 					{% csrf_token %}
 					{{ create_company_form|crispy }}
 					<button type="submit" class="btn btn-primary">Save</button>
@@ -33,9 +33,9 @@ Companies
 								</button>
 							</td>
 							<td>
-								<form action="{% url 'companies:company_delete' company.id %}" method="POST">{% csrf_token %}
-								<input type="submit" class="btn btn-danger" value="Delete">
-							</form>
+								<form action="{% url 'companies:delete_company' company.id %}" method="POST">{% csrf_token %}
+									<input type="submit" class="btn btn-danger" value="Delete">
+								</form>
 							</td>
 						</tr>
 						{% endfor %}
@@ -49,7 +49,7 @@ Companies
 	<br/>
 	
 	<div class="container">
-		<form method="POST" class="form-control bg-dark text-light">
+		<form action="{% url 'companies:calculate_stats' %}" method="POST" class="form-control bg-dark text-light">
 			{% csrf_token %}
 			{{ calculate_stats_form }}
 			<button type="submit" class="btn btn-primary">Calculate</button>
@@ -84,7 +84,7 @@ Companies
 					<td>{{ company.financialprofile.volatility }}%</td>
 					<td>{{ company.financialprofile.annual_volatility|floatformat }}%</td>
 					<td>
-						<form action="{% url 'companies:company_use' company.id %}" method="POST">{% csrf_token %}
+						<form action="{% url 'companies:use_company' company.id %}" method="POST">{% csrf_token %}
 							<input type="submit"
 								{% if company.used_in_portfolio == 'yes' %}
 									class="btn btn-danger"

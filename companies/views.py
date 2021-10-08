@@ -3,24 +3,49 @@ from .models import Company, FinancialProfile
 from .utils_financial import company_df, df_mean_price, df_vol_price, corr_matrix
 from .forms import CompanyForm, CalculateStatsForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
 
+@login_required
 def home_view(request):
     # Companies created by our user
     companies = Company.objects.filter(user=request.user).order_by(
         '-financialprofile__rate_of_return',
         'financialprofile__volatility',
     )
+    create_company_form = CompanyForm()
+    calculate_stats_form = CalculateStatsForm()
+    edit_company_form = CompanyForm(initial={'symbol': Company.symbol,
+    'name': Company.name})
+
+    context = {
+        'companies': companies,
+        'create_company_form': create_company_form,
+        'calculate_stats_form': calculate_stats_form,
+        'edit_company_form': edit_company_form,
+        'start_date': companies[0].financialprofile.start_date if companies else None,
+        'end_date': companies[0].financialprofile.end_date if companies else None,
+    }
+
+    return render(request, 'companies/home.html', context=context)
+
+
+@login_required
+def create_company_view(request):
+    companies = Company.objects.filter(user=request.user).order_by(
+        '-financialprofile__rate_of_return',
+        'financialprofile__volatility',
+    )
     if request.method == 'POST':
         create_company_form = CompanyForm(request.POST)
-        calculate_stats_form = CalculateStatsForm(request.POST)
         if create_company_form.is_valid():
             # Checking if our user already got company named like this
             existing_company = companies.filter(symbol=create_company_form.cleaned_data.get('symbol')).first()
             if existing_company:
-                messages.error(request, "Company already exists!")
+                messages.error(request, 'Company already exists!')
             else:
                 # Saving company with our user's id
                 company = create_company_form.save(commit=False)
@@ -28,7 +53,57 @@ def home_view(request):
                 company.save()
                 financialprofile = FinancialProfile(company=company)
                 financialprofile.save()
-                messages.success(request, "Company added!")
+                messages.success(request, 'Company added!')
+            return redirect('companies:home')
+
+
+@login_required
+def delete_company_view(request, pk):
+    # Deleting not wanted anymore companies in our user's db
+    company_to_delete = get_object_or_404(Company, pk=pk)
+    if company_to_delete.user == request.user:
+        company_to_delete.delete()
+        messages.info(request, 'Company deleted!')
+        return redirect(reverse('companies:home'))
+    else:
+        messages.error(request, 'You cannot delete this company, because u ain\'t right user!')
+        return redirect('companies:home')
+
+
+@login_required
+def edit_company_view(request, pk):
+    # Editing company symbol or name
+    company_to_edit = get_object_or_404(Company, pk=pk)
+    if request.method == 'POST':
+        edit_company_form = CompanyForm(request.POST or None,
+                                        instance=company_to_edit)
+        if edit_company_form.is_valid():
+            edit_company_form.save()
+            messages.info(request, 'Company updated!')
+            return redirect('companies:home')
+
+
+@login_required
+def use_company_view(request, pk):
+    # Changing status of companies (to be used in portfolio or not)
+    company_to_use = get_object_or_404(Company, pk=pk)
+    if request.method == 'POST':
+        if company_to_use.used_in_portfolio == 'yes':
+            company_to_use.used_in_portfolio = 'no'
+        else:
+            company_to_use.used_in_portfolio = 'yes'
+        company_to_use.save()
+        return redirect(reverse('companies:home')+'#use_companies_table')
+
+
+@login_required
+def calculate_stats_view(request):
+    companies = Company.objects.filter(user=request.user).order_by(
+        '-financialprofile__rate_of_return',
+        'financialprofile__volatility',
+    )
+    if request.method == 'POST':
+        calculate_stats_form = CalculateStatsForm(request.POST)
         if calculate_stats_form.is_valid():
             # We calculate our companies stats (rates and volatility) and create correlation matrix
             symbols = []
@@ -61,58 +136,7 @@ def home_view(request):
             corr_mat = corr_matrix(df, style=df_style)
             # Put it in session to do not need to create all the time new matrix
             request.session['corr_mat'] = corr_mat
-            messages.success(request, "Companies stats calculated!")
-        return redirect(reverse('companies:home'))
-    else:
-        create_company_form = CompanyForm()
-        calculate_stats_form = CalculateStatsForm()
-        edit_company_form = CompanyForm()
-
-    context = {
-        'companies': companies,
-        'create_company_form': create_company_form,
-        'calculate_stats_form': calculate_stats_form,
-        'edit_company_form': edit_company_form,
-        'start_date': companies[0].financialprofile.start_date if companies else None,
-        'end_date': companies[0].financialprofile.end_date if companies else None,
-    }
-
-    return render(request, 'companies/home.html', context=context)
-
-
-def delete_company_view(request, pk):
-    # Deleting unwanted anymore companies in our user's db
-    company_to_delete = get_object_or_404(Company, pk=pk)
-    if company_to_delete.user == request.user:
-        company_to_delete.delete()
-        messages.info(request, 'Company deleted!')
-        return redirect(reverse('companies:home'))
-    else:
-        messages.error(request, "You cannot delete this company, because u ain't right user!")
-        return redirect(reverse('companies:home'))
-
-
-def edit_company_view(request, pk):
-    # Editing company symbol or name
-    company_to_edit = get_object_or_404(Company, pk=pk)
-    if request.method == 'POST':
-        edit_company_form = CompanyForm(request.POST or None,
-                                        instance=company_to_edit)
-        if edit_company_form.is_valid():
-            edit_company_form.save()
-            messages.info(request, 'Company updated!')
-            return redirect(reverse('companies:home'))
-
-
-def use_company_view(request, pk):
-    # Changing status of companies (to be used in portfolio or not)
-    company_to_use = get_object_or_404(Company, pk=pk)
-    if request.method == 'POST':
-        if company_to_use.used_in_portfolio == 'yes':
-            company_to_use.used_in_portfolio = 'no'
-        else:
-            company_to_use.used_in_portfolio = 'yes'
-        company_to_use.save()
-        return redirect(reverse('companies:home')+'#use_companies_table')
+            messages.success(request, 'Companies stats calculated!')
+        return redirect('companies:home')
 
 

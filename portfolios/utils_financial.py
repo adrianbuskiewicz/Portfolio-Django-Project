@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import yfinance as yf
+import datetime as dt
 
 
 def portfolios_simulation(companies, start, end):
@@ -12,7 +13,8 @@ def portfolios_simulation(companies, start, end):
 
     cov_matrix = logarithmic_rates.cov()
 
-    ind_er = close_prices.resample('Y').last().pct_change().mean()
+    # ind_er = close_prices.resample('Y').last().pct_change().mean()
+    ind_er = logarithmic_rates.mean()*250
 
     ann_sd = logarithmic_rates.std().apply(lambda x: x * np.sqrt(250))
 
@@ -49,8 +51,8 @@ def portfolios_simulation(companies, start, end):
 def mvp_calculate(companies, start, end):
     portfolios = portfolios_simulation(companies, start, end)
     mvp = portfolios.iloc[portfolios['Volatility'].idxmin()]
-    ror = round(mvp.loc['RoR'] * 100, 2)
-    vol = round(mvp.loc['Volatility'] * 100, 2)
+    ror = round(mvp.loc['RoR'] * 100, 4)
+    vol = round(mvp.loc['Volatility'] * 100, 4)
     companies_weights = {symbol: round(mvp.loc[symbol] * 100, 2) for symbol in mvp.index[2:]}
     return {'rate_of_return': ror, 'volatility': vol, 'companies_weights': companies_weights}
 
@@ -58,17 +60,18 @@ def mvp_calculate(companies, start, end):
 def orp_calculate(companies, start, end, rf):
     portfolios = portfolios_simulation(companies, start, end)
     orp = portfolios.iloc[((portfolios['RoR'] - (rf/100)) / portfolios['Volatility']).idxmax()]
-    ror = round(orp.loc['RoR'] * 100, 2)
-    vol = round(orp.loc['Volatility'] * 100, 2)
+    ror = round(orp.loc['RoR'] * 100, 4)
+    vol = round(orp.loc['Volatility'] * 100, 4)
     companies_weights = {symbol: round(orp.loc[symbol] * 100, 2) for symbol in orp.index[2:]}
     return {'rate_of_return': ror, 'volatility': vol, 'companies_weights': companies_weights}
 
 
 def get_actual_price(symbol):
-    df = yf.download(tickers=symbol, period='1d', interval='1m')
-    date = df.index[-1]
+    start_time = dt.datetime.now() - dt.timedelta(hours=1)
+    df = yf.download(tickers=symbol, start=start_time, interval='5m')
+    # date = df.index[-1]
     price = df.loc[df.index[-1], 'Adj Close']
-    return {'date': date, 'price': price}
+    return {'date': dt.datetime.now(), 'price': round(price, 2)}
 
 
 def calculate_stocks_amount(budget, weight, symbol):

@@ -18,7 +18,7 @@
   	{% if messages %}
 		<ul class="messages">
 			{% for message in messages %}
-				<div class="container-fluid p-0">
+				<div class="container-fluid">
 				  <div class="alert {{ message.tags }} alert-dismissible" role="alert" >
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
 					</button>
@@ -28,8 +28,10 @@
 			{% endfor %}
 		</ul>
 	{% endif %}
+	<div class="container mt-5">
     {% block content %}
 	{% endblock content %}
+	</div>
 
 	<!-- Optional JavaScript; choose one of the two! -->
 

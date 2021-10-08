@@ -35,6 +35,11 @@ Create Portfolios
 					<td>
 						<a href="{{ portfolio.get_absolute_url }}" class="btn btn-primary">Details</a>
 					</td>
+					<td>
+						<form action="{% url 'portfolios:delete_bought_portfolio' portfolio.id %}" method="POST">{% csrf_token %}
+							<input type="submit" class="btn btn-danger" value="Delete">
+						</form>
+					</td>
 				</tr>
 			</tbody>
 		</table>

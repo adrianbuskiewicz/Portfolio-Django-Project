@@ -8,10 +8,10 @@
         <h5 class="modal-title" id="exampleModalLabel">Edit company</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="{% url 'companies:company_edit' company.id %}" method="POST">
+      <form action="{% url 'companies:edit_company' company.id %}" method="POST">
       <div class="modal-body">
 		  {% csrf_token %}
-		  {{ edit_company_form|crispy }}
+	      {{ edit_company_form|crispy }}
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-primary">Save changes</button>

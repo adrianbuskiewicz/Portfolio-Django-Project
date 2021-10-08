@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from companies.models import Company
 from .forms import CalculatePortfoliosForm, BoughtPortfolioForm
 from .models import MVP, ORP, BoughtPortfolio, CompanyWeight, BoughtCompaniesStocks, Portfolio
@@ -6,11 +6,13 @@ from .utils_financial import mvp_calculate, orp_calculate, get_actual_price, cal
 from django.views.generic import ListView, DetailView
 from django.contrib import messages
 from datetime import datetime as dt
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 # Create your views here.
 
-
+@login_required
 def calculate_portfolios_view(request):
     # We want just user companies to display and use them in MVP and ORP
     companies = Company.objects.filter(user=request.user).filter(used_in_portfolio='yes').order_by(
@@ -86,7 +88,7 @@ def calculate_portfolios_view(request):
                 company_weight.save()
                 orp.company_weights.add(company_weight)
             messages.success(request, "MVP and ORP created!")
-        return redirect(reverse('portfolios:create_portfolios'))
+        return redirect('portfolios:create_portfolios')
 
     else:
         calculate_portfolios_form = CalculatePortfoliosForm()
@@ -105,6 +107,7 @@ def calculate_portfolios_view(request):
     return render(request, 'portfolios/portfolios.html', context=context)
 
 
+@login_required
 def not_use_company_view(request, pk):
     # Changing used company to not used and redirecting to same page
     company_to_use = get_object_or_404(Company, pk=pk)
@@ -112,9 +115,10 @@ def not_use_company_view(request, pk):
         if company_to_use.used_in_portfolio == 'yes':
             company_to_use.used_in_portfolio = 'no'
             company_to_use.save()
-    return redirect(reverse('portfolios:create_portfolios'))
+    return redirect('portfolios:create_portfolios')
 
 
+@login_required
 def create_bought_portfolio_view(request, pk):
     portfolio = get_object_or_404(Portfolio, pk=pk)
     if portfolio.portfolio_type == 'mvp':
@@ -154,10 +158,10 @@ def create_bought_portfolio_view(request, pk):
                     bought_portfolio=new_bought_portfolio,
                 )
                 stocks.save()
-    return redirect(reverse('portfolios:create_portfolios'))
+    return redirect('portfolios:create_portfolios')
 
 
-class BoughtPortfolios(ListView):
+class BoughtPortfolios(LoginRequiredMixin, ListView):
     model = BoughtPortfolio
     template_name = 'portfolios/bought_portfolios.html'
     context_object_name = 'bought_portfolios'
@@ -169,7 +173,7 @@ class BoughtPortfolios(ListView):
         )
 
 
-class BoughtPortfolioDetail(DetailView):
+class BoughtPortfolioDetail(LoginRequiredMixin, DetailView):
     model = BoughtPortfolio
     template_name = 'portfolios/bought_portfolio_detail.html'
     context_object_name = 'bought_portfolio'
@@ -179,6 +183,19 @@ class BoughtPortfolioDetail(DetailView):
         stocks = BoughtCompaniesStocks.objects.filter(bought_portfolio=self.object.id)
         context['all_stocks'] = stocks
         return context
+
+
+@login_required
+def delete_bought_portfolio_view(request, pk):
+    # Deleting not wanted anymore portfolios in our user's db
+    portfolio_to_delete = get_object_or_404(BoughtPortfolio, pk=pk)
+    if portfolio_to_delete.user == request.user:
+        portfolio_to_delete.delete()
+        messages.info(request, 'Portfolio deleted!')
+        return redirect('portfolios:bought_portfolios')
+    else:
+        messages.error(request, "You cannot delete this portfolio, because u ain't right user!")
+        return redirect('portfolios:bought_portfolios')
 
 
 

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # My apps
     'companies.apps.CompaniesConfig',
     'portfolios.apps.PortfoliosConfig',
+    'members.apps.MembersConfig',
     'crispy_forms',
     'django.contrib.humanize',
 ]
@@ -136,6 +137,8 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'members:login_user'
 
 MESSAGE_TAGS = {
         messages.DEBUG: 'alert-secondary',
